@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using HidLibrary;
+using u2fhost.Logging;
 using u2flib;
 using u2flib.Data;
 
@@ -9,6 +10,8 @@ namespace u2fhost
 {
 	public static class U2FHost
 	{
+		private static readonly ILog Log = LogProvider.GetCurrentClassLogger();
+
 		public static async Task<DeviceRegistration> RegisterAsync(IHidDevice hidDevice, string appId, string facet, CancellationToken? cancellationToken = null)
 		{
 			cancellationToken = cancellationToken ?? CancellationToken.None;
@@ -22,11 +25,11 @@ namespace u2fhost
 			{
 				var startRegistration = U2F.StartRegistration(appId);
 
-				Console.WriteLine("Touch token to register");
+				Log.Debug("Touch token to register");
 				var registerResponse = await WaitForTokenInputAsync(() => U2Fv2.RegisterAsync(u2fHidDevice, startRegistration, facet), cancellationToken.Value);
 
 				var deviceRegistration = U2F.FinishRegistration(startRegistration, registerResponse);
-				Console.WriteLine("Registered");
+				Log.Debug("Registered");
 
 				return deviceRegistration;
 			}
@@ -45,11 +48,11 @@ namespace u2fhost
 			{
 				var startAuthentication = U2F.StartAuthentication(appId, deviceRegistration);
 
-				Console.WriteLine("Touch token to authenticate");
+				Log.Debug("Touch token to authenticate");
 				var authenticateResponse = await WaitForTokenInputAsync(() => U2Fv2.AuthenticateAsync(u2fHidDevice, startAuthentication, facet, checkOnly), cancellationToken.Value).ConfigureAwait(false);
 
 				U2F.FinishAuthentication(startAuthentication, authenticateResponse, deviceRegistration);
-				Console.WriteLine("Authenticated");
+				Log.Debug("Authenticated");
 			}
 		}
 

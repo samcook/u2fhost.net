@@ -2,14 +2,17 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using HidLibrary;
+using log4net;
 
 namespace u2fhost.console
 {
 	public static class Sample
 	{
+		private static readonly ILog Log = LogManager.GetLogger(typeof (Sample));
+
 		public static async Task Run(int vendorId, int productId)
 		{
-			Console.WriteLine("Insert U2F device");
+			Log.Info("Insert U2F device");
 
 			IHidDevice hidDevice = null;
 

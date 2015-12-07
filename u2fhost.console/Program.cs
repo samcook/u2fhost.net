@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Linq;
+using log4net;
+using log4net.Config;
 
 namespace u2fhost.console
 {
 	public class Program
 	{
+		private static readonly ILog Log = LogManager.GetLogger(typeof (Program));
+
 		private const int VendorId = 0x1050;
 		private const int ProductId = 0x0120;
 
 		public static void Main(string[] args)
 		{
+			XmlConfigurator.Configure();
+
 			Sample.Run(VendorId, ProductId).Wait();
 		}
 
@@ -21,15 +27,15 @@ namespace u2fhost.console
 
 			var pingResponse = u2F.PingAsync(pingData).Result;
 
-			Console.WriteLine($"Ping response data matches request: {pingData.SequenceEqual(pingResponse)}");
+			Log.Debug($"Ping response data matches request: {pingData.SequenceEqual(pingResponse)}");
 		}
 
 		private static void PrintVersions(ApduDevice apdu)
 		{
-			Console.WriteLine("Supported versions:");
+			Log.Debug("Supported versions:");
 			foreach (var version in apdu.GetSupportedVersionsAsync().Result)
 			{
-				Console.WriteLine(version);
+				Log.Debug(version);
 			}
 		}
 	}

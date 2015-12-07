@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HidLibrary;
+using u2fhost.Logging;
 
 namespace u2fhost
 {
@@ -21,6 +22,8 @@ namespace u2fhost
 		//    (0x1050, 0x0406),  # YubiKey 4 U2F+CCID
 		//    (0x1050, 0x0407),  # YubiKey 4 OTP+U2F+CCID
 		//]
+
+		private static readonly ILog Log = LogProvider.GetCurrentClassLogger();
 
 		private const byte TYPE_INIT = 0x80;
 		private const int HID_RPT_SIZE = 64;
@@ -55,7 +58,7 @@ namespace u2fhost
 
 		protected async Task InitAsync()
 		{
-			Console.WriteLine("Init");
+			Log.Debug("Init");
 
 			var nonce = new byte[8];
 			random.NextBytes(nonce);
@@ -64,13 +67,13 @@ namespace u2fhost
 			while (!response.Take(8).SequenceEqual(nonce))
 			{
 				await Task.Delay(100);
-				Console.WriteLine("Wrong nonce, read again...");
+				Log.Debug("Wrong nonce, read again...");
 				response = await CallAsync(CMD_INIT, nonce);
 			}
 
 			this.cid = response.Skip(8).Take(4).ToArray();
 
-			Console.WriteLine("Cid: {0}", BitConverter.ToString(this.cid));
+			Log.Debug($"Cid: {BitConverter.ToString(this.cid)}");
 		}
 
 		public void SetMode(string mode)
@@ -101,14 +104,14 @@ namespace u2fhost
 
 		private async Task SendRequestAsync(byte command, byte[] data = null)
 		{
-			//Console.WriteLine("SendRequest: {0:X2}", command);
+			//Log.Debug($"SendRequest: {command:X2}");
 
 			if (data == null)
 			{
 				data = new byte[0];
 			}
 
-			//Console.WriteLine($"Data: {BitConverter.ToString(data)}");
+			//Log.Debug($"Data: {BitConverter.ToString(data)}");
 
 			//var reportSize = hidDevice.Capabilities.InputReportByteLength;
 			var reportSize = HID_RPT_SIZE;
@@ -118,7 +121,7 @@ namespace u2fhost
 			var bc_h = (byte)(size >> 8 & 0xff);
 			var payloadData = data.Take(reportSize - 7).ToArray();
 
-			//Console.WriteLine($"Payload data: {BitConverter.ToString(payloadData)}");
+			//Log.Debug($"Payload data: {BitConverter.ToString(payloadData)}");
 
 			var payloadBuilder = new ByteArrayBuilder();
 			payloadBuilder.Append(cid);
@@ -141,7 +144,7 @@ namespace u2fhost
 			while (remainingData.Length > 0)
 			{
 				payloadData = remainingData.Take(reportSize - 5).ToArray();
-				//Console.WriteLine($"Payload data: {BitConverter.ToString(payloadData)}");
+				//Log.Debug($"Payload data: {BitConverter.ToString(payloadData)}");
 
 				payloadBuilder.Clear();
 				payloadBuilder.Append(cid);
@@ -167,7 +170,7 @@ namespace u2fhost
 
 		private async Task<byte[]> ReadResponseAsync(byte command)
 		{
-			//Console.WriteLine("ReadResponse");
+			//Log.Debug("ReadResponse");
 
 			//var reportSize = hidDevice.Capabilities.OutputReportByteLength;
 			var reportSize = HID_RPT_SIZE;
@@ -206,7 +209,7 @@ namespace u2fhost
 			var dataLength = (report.Data[5] << 8) + report.Data[6];
 
 			var payloadData = report.Data.Skip(7).Take(Math.Min(dataLength, reportSize)).ToArray();
-			//Console.WriteLine($"Payload data: {BitConverter.ToString(payloadData)}");
+			//Log.Debug($"Payload data: {BitConverter.ToString(payloadData)}");
 
 			byteArrayBuilder.Clear();
 			byteArrayBuilder.Append(payloadData);
@@ -232,7 +235,7 @@ namespace u2fhost
 				}
 				seq++;
 				payloadData = report.Data.Skip(5).Take(Math.Min(dataLength, reportSize)).ToArray();
-				//Console.WriteLine($"Payload data: {BitConverter.ToString(payloadData)}");
+				//Log.Debug($"Payload data: {BitConverter.ToString(payloadData)}");
 
 				dataLength -= payloadData.Length;
 				byteArrayBuilder.Append(payloadData);
