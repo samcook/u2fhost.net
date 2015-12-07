@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+	<metadata>
+		<id>u2fhost.net</id>
+		<version>1.0.0</version>
+		<title>u2fhost.net</title>
+		<authors>Sam Cook</authors>
+		<owners>Sam Cook</owners>
+		<licenseUrl>https://github.com/samcook/u2fhost.net/blob/master/LICENSE</licenseUrl>
+		<projectUrl>https://github.com/samcook/u2fhost.net</projectUrl>
+		<!--<iconUrl></iconUrl>-->
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>A library for communicating with U2F devices over USB.</description>
+		<releaseNotes>
+1.0.0 - Initial release
+		</releaseNotes>
+		<copyright>Copyright 2015 Sam Cook</copyright>
+		<tags>U2F USB HID Fido Universal 2nd Factor Yubikey</tags>
+		<dependencies>
+			<dependency id="hidlibrary" version="3.2.31.0"/>
+			<dependency id="u2flib" version="1.0.1"/>
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="u2fhost\bin\Release\u2fhost.dll" target="lib\net45" />
+	</files>
+</package>
