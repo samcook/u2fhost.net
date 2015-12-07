@@ -1,0 +1,13 @@
+# Install the EditorConfig VS plugin to automatically apply formatting settings to this solution
+# See http://editorconfig.org/ for syntax
+
+# top-most EditorConfig file
+root = true
+
+[*.cs]
+indent_style = tab
+indent_size = 4
+
+[*.config]
+indent_style = tab
+indent_size = 2
